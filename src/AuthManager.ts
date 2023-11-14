@@ -1,14 +1,15 @@
 import { ApiClient } from './ApiClient';
 import { AuthSession } from './AuthSession';
-import { JwtToken } from './JwtToken';
+import { JwtToken, RegisteredClaims } from './JwtToken';
 import {
   deleteScriptStorageValue,
   getScriptStorageValue,
   setScriptStorageValue
 } from './utils/script-storage';
+import { getWazeWindow } from './utils/window';
 
 export class AuthManager {
-  private _accessToken: JwtToken;
+  private _accessToken: JwtToken<RegisteredClaims & { username: string; rank: number }>;
   private static _ACCESS_TOKEN_STORAGE_KEY = 'WAZE_SPACE_CLIENT_TOKEN'
 
   constructor(
@@ -44,7 +45,7 @@ export class AuthManager {
   }
 
   async _authenticateIfNecessary() {
-    if (!this._isUnauthenticated) return;
+    if (!this._isUnauthenticated && !this.isObsoleteSession) return;
     await this._authenticate();
   }
 
@@ -55,5 +56,14 @@ export class AuthManager {
 
   get accessToken() {
     return this._accessToken;
+  }
+
+  get isObsoleteSession() {
+    const { sub, username, rank } = this.accessToken.payload;
+    if (!sub || !username || !rank) return true;
+    const loggedInUser = getWazeWindow().W.loginManager.user;
+    return loggedInUser.getID() !== sub
+      || loggedInUser.getUsername() !== username
+      || loggedInUser.getRank() !== rank;
   }
 }

@@ -65,4 +65,8 @@ export class JwtToken<P extends RegisteredClaims = RegisteredClaims, H = any> {
     const payloadEncoded = JwtToken._encodeSegment(this._payload);
     return `${headerEncoded}.${payloadEncoded}.${this._signature}`;
   }
+
+  get payload() {
+    return this._payload;
+  }
 }
