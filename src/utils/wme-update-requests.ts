@@ -1,9 +1,12 @@
 import { getCookieValue } from './cookie';
 import { getWazeWindow } from './window';
+import { changeDescartesEnvOnPath, WazeDescartesEnvironment } from './wme-descrates';
 
-export async function sendUpdateRequestComment(updateRequestId: number, text: string) {
+export async function sendUpdateRequestComment(updateRequestId: number, text: string, environment?: WazeDescartesEnvironment) {
   const csrfToken = getCookieValue('_csrf_token');
-  const response = await fetch(getWazeWindow().W.Config.paths.updateRequestComments, {
+  let sendToPath = getWazeWindow().W.Config.paths.updateRequestComments;
+  if (environment) sendToPath = changeDescartesEnvOnPath(sendToPath, environment);
+  const response = await fetch(sendToPath, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',

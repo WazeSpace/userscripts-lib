@@ -1,10 +1,12 @@
+import { AuthManager } from './AuthManager';
 import * as path from './utils/path';
+import { ClientOptions } from './WazeSpaceClient';
 
 export class ApiClient {
-  private _accessToken: string;
+  readonly _authManager: AuthManager;
 
-  constructor(private readonly _host: string) {
-    this._accessToken = ApiClient._getAccessTokenFromMemory();
+  constructor(private readonly _host: string, clientOptions: Readonly<ClientOptions>) {
+    this._authManager = new AuthManager(this, clientOptions.userscriptId);
   }
 
   private _expandUrl(...paths: string[]) {
@@ -16,6 +18,7 @@ export class ApiClient {
   }
 
   private _prepareBody(body: any) {
+    if (!body) return undefined;
     if (typeof body === 'string') return body;
     return JSON.stringify(body);
   }
@@ -70,9 +73,17 @@ export class ApiClient {
     return constructedUrl.toString();
   }
 
-  async _sendRequest(method: string, url: string, data?: any) {
+  async _sendRequest(
+    method: string,
+    url: string,
+    data?: any,
+    allowUnauthorized = false
+  ) {
     url = this._expandUrl(url);
-    url = this._setTokenOnURL(url);
+    if (!allowUnauthorized) {
+      await this._authManager._authenticateIfNecessary();
+      url = this._setTokenOnURL(url);
+    }
 
     let response: Response | null = null;
     try {
@@ -89,21 +100,7 @@ export class ApiClient {
     return new URL(this._expandUrl(this._host, ...paths));
   }
 
-  private static _getAccessTokenFromMemory(): string {
-    const getValue = (window as any)['GM_getValue'];
-    if (!getValue) return;
-    return getValue('WAZE_SPACE_CLIENT_TOKEN', null);
-  }
-
   get accessToken() {
-    return this._accessToken;
-  }
-
-  set accessToken(value: string) {
-    this._accessToken = value;
-
-    const setValue = (window as any)['GM_setValue'];
-    if (!setValue) return;
-    setValue('WAZE_SPACE_CLIENT_TOKEN', value);
+    return this._authManager.accessToken.toString();
   }
 }
