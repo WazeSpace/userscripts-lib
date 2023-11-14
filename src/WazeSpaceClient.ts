@@ -11,6 +11,7 @@ const defaultClientOptions: Partial<ClientOptions> = {
 };
 
 export class WazeSpaceClient {
+  // noinspection JSUnusedGlobalSymbols
   static readonly VERSION = process.env.VERSION;
 
   private readonly _apiClient: ApiClient;
@@ -32,10 +33,12 @@ export class WazeSpaceClient {
     if (!options.userscriptId) throw new Error('UserScript ID is required');
   }
 
+  // noinspection JSUnusedGlobalSymbols
   async authenticate() {
     await this._apiClient._authManager._authenticateIfNecessary();
   }
 
+  // noinspection JSUnusedGlobalSymbols
   get cloudStorage() {
     return this._cloudStorage;
   }
