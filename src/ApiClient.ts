@@ -4,9 +4,7 @@ export class ApiClient {
   private _accessToken: string;
 
   constructor(private readonly _host: string) {
-    ApiClient._getAccessTokenFromMemory().then(
-      (accessToken) => this._accessToken = accessToken,
-    );
+    this._accessToken = ApiClient._getAccessTokenFromMemory();
   }
 
   private _expandUrl(...paths: string[]) {
@@ -91,10 +89,10 @@ export class ApiClient {
     return new URL(this._expandUrl(this._host, ...paths));
   }
 
-  private static async _getAccessTokenFromMemory(): Promise<string> {
+  private static _getAccessTokenFromMemory(): string {
     const getValue = (window as any)['GM_getValue'];
     if (!getValue) return;
-    return await getValue('WAZE_SPACE_CLIENT_TOKEN', null);
+    return getValue('WAZE_SPACE_CLIENT_TOKEN', null);
   }
 
   get accessToken() {
