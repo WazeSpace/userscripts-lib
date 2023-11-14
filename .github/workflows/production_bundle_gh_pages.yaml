@@ -24,6 +24,11 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm run build
 
+      - uses: actions/upload-artifact@master
+        with:
+          name: build
+          path: dist
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
@@ -32,8 +37,12 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
-
     steps:
+      - uses: actions/download-artifact@master
+        with:
+          name: build
+          path: dist
+
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
