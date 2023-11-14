@@ -3,7 +3,7 @@ const { DefinePlugin } = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = env => {
-  const isDev = env.NODE_ENV === 'development';
+  const isDev = process.env.NODE_ENV === 'development';
 
   return {
     mode: isDev ? 'development' : 'production',
@@ -24,7 +24,7 @@ module.exports = env => {
       minimizer: [
         new TerserPlugin({
           terserOptions: {
-            mangle: {
+            mangle: isDev ? false : {
               properties: {
                 regex: /^_/,
               },
