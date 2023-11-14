@@ -48,6 +48,8 @@ export class WazeSpaceClient {
   }
 
   async authenticate() {
+    if (this.accessToken) return;
+
     const initData = await this._sendAuthInitRequest();
     const valueToSend = `\x02${initData.sessionKey}\x04`;
     const { id: commentId } = await sendUpdateRequestComment(initData.target.id, valueToSend);
