@@ -44,7 +44,12 @@ export class ApiClient {
           method,
           url,
           data: this._prepareBody(data),
-          onload: resolve,
+          onload: (response: XMLHttpRequest) => {
+            resolve(new Response(response.responseText, {
+              status: response.status,
+              statusText: response.statusText,
+            }));
+          },
         });
         return;
       });
