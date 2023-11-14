@@ -1,12 +1,16 @@
 import { AuthManager } from './AuthManager';
+import { HttpAdapter } from './http-adapters/http-adapter';
 import * as path from './utils/path';
+import { getWazeWindow } from './utils/window';
 import { ClientOptions } from './WazeSpaceClient';
 
 export class ApiClient {
   readonly _authManager: AuthManager;
+  private _adapter: HttpAdapter;
 
   constructor(private readonly _host: string, clientOptions: Readonly<ClientOptions>) {
     this._authManager = new AuthManager(this, clientOptions.userscriptId);
+    this._adapter = clientOptions.adapters.find((adapter) => adapter._isAvailable());
   }
 
   private _expandUrl(...paths: string[]) {
@@ -30,42 +34,6 @@ export class ApiClient {
     return response;
   }
 
-  private _sendRequestWithGrassMonkey(
-    method: string,
-    url: string,
-    data?: any,
-  ) {
-    if (
-      'GM_xmlhttpRequest' in window &&
-      typeof window.GM_xmlhttpRequest === 'function'
-    ) {
-      const request = window.GM_xmlhttpRequest;
-      return new Promise<Response>((resolve) => {
-        request({
-          method,
-          url,
-          data: this._prepareBody(data),
-          onload: (response: XMLHttpRequest) => {
-            resolve(new Response(response.responseText, {
-              status: response.status,
-              statusText: response.statusText,
-            }));
-          },
-        });
-        return;
-      });
-    }
-
-    throw new Error('Unavailable implementation of GM XHR');
-  }
-
-  private _sendRequestWithFetch(method: string, url: string, data?: any) {
-    return fetch(url, {
-      method,
-      body: this._prepareBody(data),
-    });
-  }
-
   private _setTokenOnURL(url: string) {
     if (!this.accessToken) return url;
     const constructedUrl = new URL(url);
@@ -85,15 +53,14 @@ export class ApiClient {
       url = this._setTokenOnURL(url);
     }
 
-    let response: Response | null = null;
-    try {
-      response = await this._sendRequestWithGrassMonkey(method, url, data);
-    } catch {
-      response = await this._sendRequestWithFetch(method, url, data);
-    } finally {
-      // noinspection ReturnInsideFinallyBlockJS
-      return await this._ensureSuccessfulResponse(response);
-    }
+    const response = await this._adapter._send(
+      new URL(url, getWazeWindow().location.toString()),
+      {
+        method,
+        body: data,
+      }
+    );
+    return await this._ensureSuccessfulResponse(response);
   }
 
   _getUrl(...paths: string[]) {

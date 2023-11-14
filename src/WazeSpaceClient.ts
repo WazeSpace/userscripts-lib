@@ -1,13 +1,21 @@
 import { ApiClient } from './ApiClient';
 import { CloudStorage } from './CloudStorage';
+import { FetchAdapter } from './http-adapters/fetch-adapter';
+import { GMAdapter } from './http-adapters/gm-adapter';
+import { HttpAdapter } from './http-adapters/http-adapter';
 
 export interface ClientOptions {
   host?: string;
   userscriptId: string;
+  adapters: HttpAdapter[];
 }
 
 const defaultClientOptions: Partial<ClientOptions> = {
   host: 'https://us.waze.space',
+  adapters: [
+    new GMAdapter(),
+    new FetchAdapter(),
+  ]
 };
 
 export class WazeSpaceClient {
