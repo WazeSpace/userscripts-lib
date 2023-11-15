@@ -42,11 +42,6 @@ export class WazeSpaceClient {
   }
 
   // noinspection JSUnusedGlobalSymbols
-  async authenticate() {
-    await this._apiClient._authManager._authenticateIfNecessary();
-  }
-
-  // noinspection JSUnusedGlobalSymbols
   get authManager() {
     return this._apiClient._authManager;
   }
