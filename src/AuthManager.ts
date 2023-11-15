@@ -33,11 +33,11 @@ export class AuthManager {
     );
   }
 
-  private get _isUnauthenticated() {
+  private get isUnauthenticated() {
     return !this._accessToken || !this._accessToken.isActive;
   }
 
-  async _authenticate() {
+  async authenticate() {
     const session = await AuthSession._authenticate(this._apiClient, this._userscriptId);
     if (!session.isAuthenticated) throw new Error('Unable to authenticate');
     this._accessToken = new JwtToken(session.accessToken);
@@ -45,11 +45,11 @@ export class AuthManager {
   }
 
   async _authenticateIfNecessary() {
-    if (!this._isUnauthenticated && !this.isObsoleteSession) return;
-    await this._authenticate();
+    if (!this.isUnauthenticated && !this.isObsoleteSession) return;
+    await this.authenticate();
   }
 
-  _logout() {
+  logout() {
     deleteScriptStorageValue(AuthManager._ACCESS_TOKEN_STORAGE_KEY);
     this._accessToken = null;
   }

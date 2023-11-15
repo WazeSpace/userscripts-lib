@@ -47,6 +47,11 @@ export class WazeSpaceClient {
   }
 
   // noinspection JSUnusedGlobalSymbols
+  get authManager() {
+    return this._apiClient._authManager;
+  }
+
+  // noinspection JSUnusedGlobalSymbols
   get cloudStorage() {
     return this._cloudStorage;
   }
