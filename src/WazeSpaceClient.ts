@@ -7,7 +7,7 @@ import { HttpAdapter } from './http-adapters/http-adapter';
 export interface ClientOptions {
   host?: string;
   userscriptId: string;
-  adapters: HttpAdapter[];
+  adapters?: HttpAdapter[];
 }
 
 const defaultClientOptions: Partial<ClientOptions> = {
