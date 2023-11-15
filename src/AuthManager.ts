@@ -33,7 +33,7 @@ export class AuthManager {
     );
   }
 
-  private get isUnauthenticated() {
+  get isUnauthenticated() {
     return !this._accessToken || !this._accessToken.isActive;
   }
 
